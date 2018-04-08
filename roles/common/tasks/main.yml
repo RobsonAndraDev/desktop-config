@@ -1,0 +1,93 @@
+---
+- name: adding vlc repositories 
+  become: yes
+  apt_repository:
+    repo: ppa:videolan/master-daily
+  notify: update packages
+
+- name: adding kde repositories 
+  become: yes
+  apt_repository:
+    repo: ppa:kubuntu-ppa/backports
+  notify: update packages
+
+- name: add google chrome Apt signing key
+  become: yes
+  apt_key:
+    url: https://dl-ssl.google.com/linux/linux_signing_key.pub
+    state: present
+
+- name: adding google chrome repositories 
+  become: yes
+  apt_repository:
+    repo: deb http://dl.google.com/linux/chrome/deb/ stable main
+  notify: update packages
+
+- name: add vscode Apt signing key
+  become: yes
+  apt_key:
+    url: https://packages.microsoft.com/keys/microsoft.asc
+    keyring: /etc/apt/trusted.gpg.d/microsoft.gpg
+
+- name: adding vscode repositories 
+  become: yes
+  apt_repository:
+    repo: deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main
+  notify: update packages
+
+- name: install packages
+  become: yes
+  apt: name={{ item }} state=present
+  with_items:
+   - code
+   - curl
+   - git
+   - google-chrome-stable
+   - kubuntu-desktop
+   - meld
+   - net-tools
+   - python-pip
+   - zsh
+   
+- name: copying git config file
+  copy:
+    src: roles/common/files/gitconfig
+    dest: "/home/{{ user }}/.gitconfig"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: 0665
+    
+- name: install ohmyzsh
+  become: yes
+  shell: curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sh
+    
+- name: install docker
+  shell: curl -fsSL https://get.docker.com/ | sh
+
+- name: download and unarchive postman
+  become: yes
+  unarchive:
+    src: https://dl.pstmn.io/download/latest/linux64
+    dest: /opt/
+    remote_src: yes
+    owner: "{{ user }}"
+    
+- name: creating link to postman
+  become: yes
+  file:
+    src: /opt/Postman/Postman
+    dest: /usr/bin/postman
+    state: link
+
+
+
+
+
+
+
+
+
+
+
+
+
