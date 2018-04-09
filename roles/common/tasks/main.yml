@@ -35,6 +35,18 @@
     repo: deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main
   notify: update packages
 
+- name: add wine Apt signing key
+  become: yes
+  apt_key:
+    url: https://dl.winehq.org/wine-builds/Release.key
+    state: present
+
+- name: adding wine repositories 
+  become: yes
+  apt_repository:
+    repo: deb [arch=i386] https://dl.winehq.org/wine-builds/ubuntu/  xenial main
+  notify: update packages
+
 - name: install packages
   become: yes
   apt: name={{ item }} state=present
@@ -47,6 +59,7 @@
    - meld
    - net-tools
    - python-pip
+   - wine-stable
    - zsh
    
 - name: copying git config file
@@ -59,10 +72,28 @@
     
 - name: install ohmyzsh
   become: yes
+  become_user: "{{ user }}"
+  run_once: true
   shell: curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sh
     
 - name: install docker
+  run_once: true
   shell: curl -fsSL https://get.docker.com/ | sh
+
+- name: giving permission to {{ user }} on docker
+  become: yes
+  run_once: true
+  shell: "usermod -aG docker {{ user }}"
+
+- name: install docker compose
+  become: yes
+  run_once: true
+  shell: curl -L https://github.com/docker/compose/releases/download/1.20.1/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+
+- name: permission on compose
+  become: yes
+  run_once: true
+  shell: chmod +x /usr/local/bin/docker-compose
 
 - name: download and unarchive postman
   become: yes
