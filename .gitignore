@@ -3,4 +3,4 @@ tmp/*
 wifidriver/*
 
 # except
-!tmp/.keep
+!tmp/.gitkeep

@@ -66,6 +66,7 @@
    - build-essential
    - code
    - curl
+   - dkms
    - git
    - google-chrome-stable
    - kubuntu-desktop
@@ -99,7 +100,7 @@
   shell: curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sh
   when: ohmyzsh.stat.exists == false
 
-- name: Create ohmyzsh lock file
+- name: create ohmyzsh lock file
   file: path=./tmp/ohmyzsh state=touch
   when: ohmyzsh.stat.exists == false
 
@@ -114,7 +115,7 @@
   shell: curl -fsSL https://get.docker.com/ | sh
   when: docker.stat.exists == false
 
-- name: Create lock file
+- name: create lock file
   file: path=./tmp/docker state=touch
   when: docker.stat.exists == false
 
@@ -130,7 +131,7 @@
   shell: "usermod -aG docker {{ user }}"
   when: permission.stat.exists == false
 
-- name: Create permission lock file
+- name: create permission lock file
   file: path=./tmp/permission state=touch
   when: permission.stat.exists == false
 
@@ -147,7 +148,7 @@
   when: compose.stat.exists ==false
 
 
-- name: Create compose lock file
+- name: create compose lock file
   file: path=./tmp/compose state=touch
   when: compose.stat.exists == false
 
@@ -164,7 +165,7 @@
   when: comp_perm.stat.exists == false
 
 
-- name: Create comp_perm lock file
+- name: create comp_perm lock file
   file: path=./tmp/comp_perm state=touch
   when: comp_perm.stat.exists == false
 
@@ -197,7 +198,7 @@
   shell: git clone https://github.com/Mange/rtl8192eu-linux-driver.git wifidriver
   when: clone.stat.exists == false
 
-- name: Create clone lock file
+- name: create clone lock file
   file: path=./tmp/clone state=touch
   when: clone.stat.exists == false
   register: clone
@@ -216,30 +217,94 @@
     exit 0
   when: adapter.stat.exists == false
 
-- name: Create adapter lock file
+- name: create adapter lock file
   file: path=./tmp/adapter state=touch
   when: adapter.stat.exists == false
 
-# - name: config dkms module
-#   shell: dkms add ./rtl8192cu-fixes
-#   become: yes
-#   run_once: yes
+- name: check dkms_module lock file exist
+  stat: 
+    path: ./tmp/dkms_module
+  ignore_errors: true
+  register: dkms_module
 
-# - name: creating folder if not exist
-#   shell: mkdir -p /usr/src/8192cu-1.10
+- name: config dkms module
+  shell: dkms add ./wifidriver
+  become: yes
+  run_once: yes
+  when: dkms_module.stat.exists == false
 
-# - name: recompile and install
-#   shell: dkms install 8192cu/1.10
-#   become: yes
-#   run_once: yes
+- name: create dkms_module lock file
+  file: path=./tmp/dkms_module state=touch
+  when: dkms_module.stat.exists == false
 
-# - name: update modules
-#   shell: depmod -a
-#   become: yes
-#   run_once: yes
+- name: creating folder if not exist
+  shell: mkdir -p /usr/src/8192cu-1.10
+  become: yes
+  run_once: yes
+
+- name: check copy lock file exist
+  stat: 
+    path: ./tmp/copy
+  ignore_errors: true
+  register: copy
+
+- name: copy wifi driver folder to /usr/src/8192cu-1.10
+  copy:
+    src: wifidriver/.
+    dest: /usr/src/8192cu-1.10/
+    directory_mode: 775
+  become: yes
+  run_once: yes
+  when: copy.stat.exists == false
+
+- name: create copy lock file
+  file: path=./tmp/copy state=touch
+  when: copy.stat.exists == false
+
+- name: check recompile lock file exist
+  stat: 
+    path: ./tmp/recompile
+  ignore_errors: true
+  register: recompile
+
+- name: recompile and install
+  shell: dkms install 8192cu/1.10
+  become: yes
+  run_once: yes
+  when: recompile.stat.exists == false
+
+- name: create recompile lock file
+  file: path=./tmp/recompile state=touch
+  when: recompile.stat.exists == false
+
+- name: check update_mod lock file exist
+  stat: 
+    path: ./tmp/update_mod
+  ignore_errors: true
+  register: update_mod
+
+- name: update modules
+  shell: depmod -a
+  become: yes
+  run_once: yes
+  when: update_mod.stat.exists == false
+
+- name: create update_mod lock file
+  file: path=./tmp/update_mod state=touch
+  when: update_mod.stat.exists == false
+
+# - name: check native lock file exist
+#   stat: 
+#     path: ./tmp/native
+#   ignore_errors: true
+#   register: native
 
 # - name: desable native driver
-#   shell: cp ./rtl8192cu-fixes/blacklist-native-rtl8192.conf /etc/modprobe.d/ 
+#   shell: cp ./wifidriver/blacklist-native-rtl8192.conf /etc/modprobe.d/ 
 #   become: yes
 #   run_once: yes
+#   when: native.stat.exists == false
 
+# - name: create native lock file
+#   file: path=./tmp/native state=touch
+#   when: native.stat.exists == false
