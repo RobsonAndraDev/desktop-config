@@ -1,0 +1,6 @@
+# ignore folders 
+tmp/*
+wifidriver/*
+
+# except
+!tmp/.keep

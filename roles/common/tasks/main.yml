@@ -47,21 +47,36 @@
     repo: deb [arch=i386] https://dl.winehq.org/wine-builds/ubuntu/  xenial main
   notify: update packages
 
+- name: add spotify Apt signing key
+  become: yes
+  apt_key:
+    keyserver: keyserver.ubuntu.com
+    id: 0DF731E45CE24F27EEEB1450EFDC8610341D9410
+
+- name: adding spotify repositories 
+  become: yes
+  apt_repository:
+    repo: deb http://repository.spotify.com stable non-free | sudo tee /etc/apt/sources.list.d/spotify.list
+  notify: update packages
+
 - name: install packages
   become: yes
   apt: name={{ item }} state=present
   with_items:
+   - build-essential
    - code
    - curl
    - git
    - google-chrome-stable
    - kubuntu-desktop
+   - linux-headers-generic
    - meld
    - net-tools
    - python-pip
+   - spotify-client
    - wine-stable
    - zsh
-   
+
 - name: copying git config file
   copy:
     src: roles/common/files/gitconfig
@@ -69,31 +84,89 @@
     owner: "{{ user }}"
     group: "{{ user }}"
     mode: 0665
-    
+
+
+- name: check ohmyzsh lock file exist
+  stat: 
+    path: ./tmp/ohmyzsh
+  ignore_errors: true
+  register: ohmyzsh
+
 - name: install ohmyzsh
   become: yes
   become_user: "{{ user }}"
   run_once: true
   shell: curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sh
-    
+  when: ohmyzsh.stat.exists == false
+
+- name: Create ohmyzsh lock file
+  file: path=./tmp/ohmyzsh state=touch
+  when: ohmyzsh.stat.exists == false
+
+- name: check docker lock file exist
+  stat: 
+    path: ./tmp/docker
+  ignore_errors: true
+  register: docker
+
 - name: install docker
   run_once: true
   shell: curl -fsSL https://get.docker.com/ | sh
+  when: docker.stat.exists == false
+
+- name: Create lock file
+  file: path=./tmp/docker state=touch
+  when: docker.stat.exists == false
+
+- name: check permission lock file exist
+  stat: 
+    path: ./tmp/permission
+  ignore_errors: true
+  register: permission
 
 - name: giving permission to {{ user }} on docker
   become: yes
   run_once: true
   shell: "usermod -aG docker {{ user }}"
+  when: permission.stat.exists == false
+
+- name: Create permission lock file
+  file: path=./tmp/permission state=touch
+  when: permission.stat.exists == false
+
+- name: check compose lock file exist
+  stat: 
+    path: ./tmp/compose
+  ignore_errors: true
+  register: compose
 
 - name: install docker compose
   become: yes
   run_once: true
   shell: curl -L https://github.com/docker/compose/releases/download/1.20.1/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+  when: compose.stat.exists ==false
+
+
+- name: Create compose lock file
+  file: path=./tmp/compose state=touch
+  when: compose.stat.exists == false
+
+- name: check comp_perm lock file exist
+  stat: 
+    path: ./tmp/comp_perm
+  ignore_errors: true
+  register: comp_perm
 
 - name: permission on compose
   become: yes
   run_once: true
   shell: chmod +x /usr/local/bin/docker-compose
+  when: comp_perm.stat.exists == false
+
+
+- name: Create comp_perm lock file
+  file: path=./tmp/comp_perm state=touch
+  when: comp_perm.stat.exists == false
 
 - name: download and unarchive postman
   become: yes
@@ -110,15 +183,63 @@
     dest: /usr/bin/postman
     state: link
 
+# - name: get id of wifi adpter
+#   shell: 'lsusb | grep "D-Link" | awk "{print \$6}"'
+#   register: wifi
 
+- name: check clone lock file exist
+  stat: 
+    path: ./tmp/clone
+  ignore_errors: true
+  register: clone
 
+- name: clone adapter drives repo
+  shell: git clone https://github.com/Mange/rtl8192eu-linux-driver.git wifidriver
+  when: clone.stat.exists == false
 
+- name: Create clone lock file
+  file: path=./tmp/clone state=touch
+  when: clone.stat.exists == false
+  register: clone
 
+- name: check adapter lock file exist
+  stat: 
+    path: ./tmp/adapter
+  ignore_errors: true
+  register: adapter
 
+- name: install adapter drives
+  shell: |
+    cd ./wifidriver
+    make
+    make install
+    exit 0
+  when: adapter.stat.exists == false
 
+- name: Create adapter lock file
+  file: path=./tmp/adapter state=touch
+  when: adapter.stat.exists == false
 
+# - name: config dkms module
+#   shell: dkms add ./rtl8192cu-fixes
+#   become: yes
+#   run_once: yes
 
+# - name: creating folder if not exist
+#   shell: mkdir -p /usr/src/8192cu-1.10
 
+# - name: recompile and install
+#   shell: dkms install 8192cu/1.10
+#   become: yes
+#   run_once: yes
 
+# - name: update modules
+#   shell: depmod -a
+#   become: yes
+#   run_once: yes
 
+# - name: desable native driver
+#   shell: cp ./rtl8192cu-fixes/blacklist-native-rtl8192.conf /etc/modprobe.d/ 
+#   become: yes
+#   run_once: yes
 
