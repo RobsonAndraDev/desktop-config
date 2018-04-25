@@ -47,6 +47,18 @@
     repo: deb [arch=i386] https://dl.winehq.org/wine-builds/ubuntu/  xenial main
   notify: update packages
 
+- name: add virtualbox Apt signing key
+  become: yes
+  apt_key:
+    url: https://www.virtualbox.org/download/oracle_vbox.asc 
+    state: present
+
+- name: adding virtualbox repositories 
+  become: yes
+  apt_repository:
+    repo: deb http://download.virtualbox.org/virtualbox/debian/ artful contrib
+  notify: update packages
+
 - name: add spotify Apt signing key
   become: yes
   apt_key:
@@ -56,7 +68,7 @@
 - name: adding spotify repositories 
   become: yes
   apt_repository:
-    repo: deb http://repository.spotify.com stable non-free | sudo tee /etc/apt/sources.list.d/spotify.list
+    repo: deb http://repository.spotify.com stable non-free
   notify: update packages
 
 - name: install packages
@@ -75,6 +87,8 @@
    - net-tools
    - python-pip
    - spotify-client
+   - virtualbox
+   - virtualbox-guest-additions-iso
    - wine-stable
    - zsh
 
@@ -164,10 +178,15 @@
   shell: chmod +x /usr/local/bin/docker-compose
   when: comp_perm.stat.exists == false
 
-
 - name: create comp_perm lock file
   file: path=./tmp/comp_perm state=touch
   when: comp_perm.stat.exists == false
+
+- name: check postman lock file exist
+  stat: 
+    path: ./tmp/postman
+  ignore_errors: true
+  register: postman
 
 - name: download and unarchive postman
   become: yes
@@ -176,6 +195,7 @@
     dest: /opt/
     remote_src: yes
     owner: "{{ user }}"
+  when: postman.stat.exists == false
     
 - name: creating link to postman
   become: yes
@@ -183,6 +203,11 @@
     src: /opt/Postman/Postman
     dest: /usr/bin/postman
     state: link
+  when: postman.stat.exists == false
+
+- name: create postman lock file
+  file: path=./tmp/postman state=touch
+  when: postman.stat.exists == false
 
 # - name: get id of wifi adpter
 #   shell: 'lsusb | grep "D-Link" | awk "{print \$6}"'
