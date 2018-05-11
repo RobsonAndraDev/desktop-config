@@ -1,0 +1,9 @@
+{
+    "workbench.startupEditor": "newUntitledFile",
+    "git.showInlineOpenFileAction": false,
+    "window.menuBarVisibility": "toggle",
+    "diffEditor.renderSideBySide": false,
+    "workbench.colorCustomizations": {
+        "editorIndentGuide.activeBackground": "#ffee00"
+    }
+}
