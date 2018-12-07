@@ -11,65 +11,113 @@
     repo: ppa:kubuntu-ppa/backports
   notify: update packages
 
+- name: check chrome lock file exist
+  stat: 
+    path: ./tmp/chrome
+  ignore_errors: true
+  register: chrome
+
 - name: add google chrome Apt signing key
   become: yes
   apt_key:
     url: https://dl-ssl.google.com/linux/linux_signing_key.pub
     state: present
+  when: chrome.stat.exists == false
 
 - name: adding google chrome repositories 
   become: yes
   apt_repository:
     repo: deb http://dl.google.com/linux/chrome/deb/ stable main
   notify: update packages
+  when: chrome.stat.exists == false
+
+- name: create chrome lock file
+  file: path=./tmp/chrome state=touch
+  when: chrome.stat.exists == false
+
+- name: check code lock file exist
+  stat: 
+    path: ./tmp/code
+  ignore_errors: true
+  register: code
 
 - name: add vscode Apt signing key
   become: yes
   apt_key:
     url: https://packages.microsoft.com/keys/microsoft.asc
     keyring: /etc/apt/trusted.gpg.d/microsoft.gpg
+  when: code.stat.exists == false
 
 - name: adding vscode repositories 
   become: yes
   apt_repository:
     repo: deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main
   notify: update packages
+  when: code.stat.exists == false
+
+- name: create code lock file
+  file: path=./tmp/code state=touch
+  when: code.stat.exists == false
+
+- name: check wine lock file exist
+  stat: 
+    path: ./tmp/wine
+  ignore_errors: true
+  register: wine
 
 - name: add wine Apt signing key
   become: yes
   apt_key:
     url: https://dl.winehq.org/wine-builds/Release.key
     state: present
+  when: wine.stat.exists == false
 
 - name: adding wine repositories 
   become: yes
   apt_repository:
     repo: deb [arch=i386] https://dl.winehq.org/wine-builds/ubuntu/  xenial main
   notify: update packages
+  when: wine.stat.exists == false
 
-- name: add virtualbox Apt signing key
-  become: yes
-  apt_key:
-    url: https://www.virtualbox.org/download/oracle_vbox.asc 
-    state: present
+- name: create wine lock file
+  file: path=./tmp/wine state=touch
+  when: wine.stat.exists == false
 
-- name: adding virtualbox repositories 
-  become: yes
-  apt_repository:
-    repo: deb http://download.virtualbox.org/virtualbox/debian/ artful contrib
-  notify: update packages
+#- name: add virtualbox Apt signing key
+#  become: yes
+#  apt_key:
+#    url: https://www.virtualbox.org/download/oracle_vbox.asc 
+#    state: present
+
+#- name: adding virtualbox repositories 
+#  become: yes
+#  apt_repository:
+#    repo: deb http://download.virtualbox.org/virtualbox/debian/ artful contrib
+#  notify: update packages
+
+- name: check spotify lock file exist
+  stat: 
+    path: ./tmp/spotify
+  ignore_errors: true
+  register: spotify
 
 - name: add spotify Apt signing key
   become: yes
   apt_key:
     keyserver: keyserver.ubuntu.com
     id: 0DF731E45CE24F27EEEB1450EFDC8610341D9410
+  when: spotify.stat.exists == false
 
 - name: adding spotify repositories 
   become: yes
   apt_repository:
     repo: deb http://repository.spotify.com stable non-free
   notify: update packages
+  when: spotify.stat.exists == false
+
+- name: create spotify lock file
+  file: path=./tmp/spotify state=touch
+  when: spotify.stat.exists == false
 
 - name: install packages
   become: yes
@@ -87,8 +135,8 @@
    - net-tools
    - python-pip
    - spotify-client
-   - virtualbox
-   - virtualbox-guest-additions-iso
+ #  - virtualbox
+ #  - virtualbox-guest-additions-iso
    - wine-stable
    - zsh
 
