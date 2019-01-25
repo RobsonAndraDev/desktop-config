@@ -3,10 +3,14 @@
 #	name = RobsonAndradedev
 	email = robsom.s.a@gmail.com
 	name = RobsonAndradev
-[diff]
-	tool = meld
 [merge]
-	tool = meld
+    tool = vscode
+[mergetool "vscode"]
+    cmd = code --wait $MERGED
+[diff]
+    tool = vscode
+[difftool "vscode"]
+    cmd = code --wait --diff $LOCAL $REMOTE
 [difftool]
 	prompt = false
 [mergetool]
