@@ -4,6 +4,12 @@
     "window.menuBarVisibility": "toggle",
     "diffEditor.renderSideBySide": false,
     "workbench.colorCustomizations": {
-        "editorIndentGuide.activeBackground": "#ffee00"
-    }
+      "editorIndentGuide.activeBackground": "#ffee00"
+    },
+    "window.titleBarStyle": "custom",
+    "editor.tabSize": 2,
+    "editor.suggestSelection": "first",
+    "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+    "[shellscript]": {},
+    "editor.largeFileOptimizations": false
 }
