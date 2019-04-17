@@ -100,17 +100,15 @@ export PATH=/usr/local/bin:$PATH
 
 tmux set -g prefix C-a
 tmux set -g mouse on
-# tmux bind -n N splitw -F h
 tmux bind -n M-Left select-pane -L
 tmux bind -n M-Right select-pane -R
 tmux bind -n M-Up select-pane -U
 tmux bind -n M-Down select-pane -D
 tmux bind -n M-v splitw -v
 tmux bind -n M-h splitw -h
-# tmux bind N break-pane
 # Set status bar
-# tmux set -g status-bg black
-# tmux set -g status-fg white
+tmux set -g status-bg black
+tmux set -g status-fg white
 # Highlight active window
 tmux set-window-option -g window-status-current-bg blue
 # Set window notifications
@@ -118,6 +116,8 @@ tmux set -g visual-activity on
 tmux setw -g monitor-activity on
 # Automatically set window title
 tmux setw -g automatic-rename
+tmux unbind -n Down
+tmux unbind -n Right
 
 pdvpn() {
   cd /home/robson/openvpn/robson.andrade/
