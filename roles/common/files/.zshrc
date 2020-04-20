@@ -2,25 +2,26 @@
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
 # Path to your oh-my-zsh installation.
-  export ZSH="/home/robson/.oh-my-zsh"
+  export ZSH=/home/robson/.oh-my-zsh
 
-# Set name of the theme to load --- if set to "random", it will
-# load a random theme each time oh-my-zsh is loaded, in which case,
-# to know which specific one was loaded, run: echo $RANDOM_THEME
+# Set name of the theme to load. Optionally, if you set this to "random"
+# it'll load a random theme each time that oh-my-zsh is loaded.
 # See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
 ZSH_THEME="murilasso"
+#ZSH_THEME="avit"
 
-# Set list of themes to pick from when loading at random
-# Setting this variable when ZSH_THEME=random will cause zsh to load
-# a theme from this variable instead of looking in ~/.oh-my-zsh/themes/
-# If set to an empty array, this variable will have no effect.
+# Set list of themes to load
+# Setting this variable when ZSH_THEME=random
+# cause zsh load theme from this variable instead of
+# looking in ~/.oh-my-zsh/themes/
+# An empty array have no effect
 # ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
 
 # Uncomment the following line to use case-sensitive completion.
 # CASE_SENSITIVE="true"
 
-# Uncomment the following line to use hyphen-insensitive completion.
-# Case-sensitive completion must be off. _ and - will be interchangeable.
+# Uncomment the following line to use hyphen-insensitive completion. Case
+# sensitive completion must be off. _ and - will be interchangeable.
 # HYPHEN_INSENSITIVE="true"
 
 # Uncomment the following line to disable bi-weekly auto-update checks.
@@ -48,22 +49,26 @@ ZSH_THEME="murilasso"
 
 # Uncomment the following line if you want to change the command execution time
 # stamp shown in the history command output.
-# You can set one of the optional three formats:
-# "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
-# or set a custom format using the strftime function format specifications,
-# see 'man strftime' for details.
+# The optional three formats: "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
 # HIST_STAMPS="mm/dd/yyyy"
+HIST_STAMPS="yyyy-mm-dd"
 
 # Would you like to use another custom folder than $ZSH/custom?
 # ZSH_CUSTOM=/path/to/new-custom-folder
 
-# Which plugins would you like to load?
-# Standard plugins can be found in ~/.oh-my-zsh/plugins/*
+# Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
+  aws
+  docker
+  docker-compose
   git
+  npm
+  pip
+  zsh-autosuggestions
+  zsh-syntax-highlighting
 )
 
 source $ZSH/oh-my-zsh.sh
@@ -74,13 +79,14 @@ source $ZSH/oh-my-zsh.sh
 
 # You may need to manually set your language environment
 # export LANG=en_US.UTF-8
+export LC_ALL=pt_BR.utf8
 
 # Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
+if [[ -n $SSH_CONNECTION ]]; then
+  export EDITOR='vim'
+else
+  export EDITOR='nano'
+fi
 
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
@@ -94,63 +100,22 @@ source $ZSH/oh-my-zsh.sh
 # For a full list of active aliases, run `alias`.
 #
 # Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
-export PATH=/usr/local/bin:$PATH
+alias zshconfig="code ~/.zshrc"
+alias ohmyzsh="code ~/.oh-my-zsh"
+alias cp="cp -v"
+export PATH=~/.local/bin:$PATH
 
-tmux set -g prefix C-a
-tmux set -g mouse on
-tmux bind -n M-Left select-pane -L
-tmux bind -n M-Right select-pane -R
-tmux bind -n M-Up select-pane -U
-tmux bind -n M-Down select-pane -D
-tmux bind -n M-v splitw -v
-tmux bind -n M-h splitw -h
-# Set status bar
-tmux set -g status-bg black
-tmux set -g status-fg white
-# Highlight active window
-tmux set-window-option -g window-status-current-bg blue
-# Set window notifications
-tmux set -g visual-activity on
-tmux setw -g monitor-activity on
-# Automatically set window title
-tmux setw -g automatic-rename
-tmux unbind -n Down
-tmux unbind -n Right
-
-pdvpn() {
-  cd /home/robson/openvpn/robson.andrade/
-  echo "Fox#pd23" | xclip
-  sudo openvpn robson.andrade.conf
-  #echo $(myPass) #  | sudo openvpn robson.andrade.conf
-}
+sudo cp /home/robson/resolv.conf /etc/resolv.conf
+# eval `ssh-agent -s`
 
 pdvpnLocal() {
-  cd /home/robson/openvpn/local/
-  echo "Fox#pd23" | xclip
+  echo "0QTWO4FMA717PYe4rJy" | xclip
+  cd /home/robson/openvpn/pd/robson.andrade/ && \
   sudo openvpn robson.andrade.conf
 }
 
-bar() {
-  echo '/' | xclip
+pdvpnOhio() {
+  $(kwallet-query -l cateiraLocal) | xclip
+  cd /home/robson/openvpn/pd/ohio/ && \
+  sudo openvpn robson.andrade.conf
 }
-
-interrogation() {
- echo '?' | xclip
-}
-
-# alias dockcont="docker container"
-cloudlog-w() {
-  # tm=[[ "$2" != "" ]] && tm="5m" || tm="$2"
-  awslogs get $(awslogs groups | grep $1) -s '2m' -w
-}
-cloudlog() {
-  # tm=[[ "$2" != "" ]] && tm="5m" || tm="$2"
-  awslogs get $(awslogs groups | grep $1) -s '2m'
-}
-kde-restart() {
-  kquitapp5 plasmashell && kstart plasmashell
-}
-
-sudo cp ~/resolv.conf /etc/resolv.conf
